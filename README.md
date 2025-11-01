@@ -1,142 +1,151 @@
-# 📚 PDF Vocabulary Assistant
+# PDF Vocabulary Assistant
 
-**PDF Vocabulary Assistant** es una aplicación web en **React + Vite** que combina un **lector de PDFs**, un **traductor instantáneo** y un **generador de tarjetas tipo Anki**, todo en una única herramienta.
+PDF Vocabulary Assistant is a small web app built with React + TypeScript + Vite. It combines a PDF reader, instant translation, and Anki-style flashcard generation to help learners study vocabulary directly from the text they read.
 
-Está diseñada para estudiantes que leen libros o papers en inglés y quieren **aprender vocabulario directamente desde el texto**, sin cambiar de aplicación.
-
----
-
-## 🚀 Características principales
-
-### 🧩 Lector de PDF interactivo
-- Soporta carga de archivos PDF locales.
-- Permite selección de texto dentro del documento.
-- Muestra número de página, zoom, miniaturas y navegación.
-
-### ⚡ Traducción instantánea
-- Selecciona una palabra o frase → se abre un popover con:
-  - Traducción instantánea (inglés → español)
-  - Pronunciación por voz (TTS)
-  - Botones para crear tarjetas de estudio
-
-### 🧠 Tarjetas de estudio tipo Anki
-- Crea tarjetas **Q/A** o **Cloze** al instante desde el texto.
-- Guarda automáticamente la palabra/frase, su traducción y la frase de contexto.
-- Todo se guarda **localmente** en IndexedDB (sin servidores externos).
-
-### ⏰ Repetición espaciada (SRS)
-- Sistema de repaso incorporado basado en el algoritmo **SM-2**.
-- Cada tarjeta tiene su propio nivel de dificultad, intervalo y fecha de repaso.
-- Modo “Revisar” para practicar las tarjetas pendientes dentro de la app.
-
-### 📤 Exportación a Anki
-- Exporta tus tarjetas en formato **CSV** compatible con Anki.
-- O conéctate a **AnkiConnect** si usas Anki localmente.
-
-### 🗣️ Pronunciación (TTS)
-- Usa la **Web Speech API** para reproducir la palabra o frase seleccionada en inglés.
-- Ideal para practicar pronunciación sin salir de la lectura.
+Tagline: Learn as you read.
 
 ---
 
-## 🛠️ Tecnologías utilizadas
+## Key features
 
-| Tipo | Librería / Framework |
-|------|----------------------|
+### Interactive PDF reader
+- Load local PDF files.
+- Select text inside the document.
+- Page number, zoom, thumbnails and navigation.
+
+### Instant translation
+- Select a word or phrase and a popover will appear with:
+  - Instant translation (English → Spanish).
+  - Voice pronunciation (TTS).
+  - Buttons to create study cards.
+
+### Anki-style flashcards
+- Create Q/A or Cloze cards directly from selected text.
+- The app saves the word/phrase, translation and context sentence automatically.
+- All data is stored locally in IndexedDB (no external servers required).
+
+### Spaced repetition (SRS)
+- Built-in review system based on the SM-2 algorithm (custom implementation).
+- Each card has its own difficulty level, interval and next-review date.
+- Review mode to practice pending cards inside the app.
+
+### Export to Anki
+- Export cards to CSV compatible with Anki.
+- Optional integration with AnkiConnect for local Anki users.
+
+### Pronunciation (TTS)
+- Uses the Web Speech API to speak selected words or phrases in English.
+
+---
+
+## Stack / Technologies
+
+| Area | Library / Framework |
+|------|--------------------|
 | Frontend | React + TypeScript + Vite |
-| UI | TailwindCSS |
-| Estado global | Zustand |
+| UI | TailwindCSS (optional) |
+| State | Zustand |
 | PDF Viewer | `@react-pdf-viewer/core` + `@react-pdf-viewer/default-layout` |
-| Persistencia local | IndexedDB (via `idb`) |
-| Repetición espaciada | Algoritmo SM-2 (implementación propia) |
-| Text-to-Speech | Web Speech API |
+| Persistence | IndexedDB (via `idb`) |
+| SRS | SM-2 (custom implementation) |
+| TTS | Web Speech API |
+
+Related files in this repo:
+- Entry: `src/main.tsx`
+- Example App: `src/App.tsx`
+- Configs: `package.json`, `vite.config.ts`, `tsconfig.app.json`, `tsconfig.node.json`, `eslint.config.js`
 
 ---
 
-## 📁 Estructura del proyecto
+## Suggested project structure
+
 src/
 ├── components/
-│ ├── PdfReaderWithAssistant.tsx # Lector PDF + selección + traducción + tarjetas
-│ ├── FlashcardReview.tsx # Modo de repaso (SRS)
-│ └── ExportToAnki.tsx # Exportación CSV
+│   ├── PdfReaderWithAssistant.tsx    # PDF reader + selection + translation + flashcard creation
+│   ├── FlashcardReview.tsx          # Review mode (SRS)
+│   └── ExportToAnki.tsx             # CSV / AnkiConnect export
 ├── lib/
-│ ├── translate.ts # Función de traducción (mock o API)
-│ ├── srs.ts # Algoritmo de repetición espaciada
-│ └── db.ts # Persistencia con IndexedDB
+│   ├── translate.ts                 # translation function (mock or API)
+│   ├── srs.ts                       # SM-2 algorithm
+│   └── db.ts                        # IndexedDB persistence
 ├── store/
-│ └── useDeckStore.ts # Estado global con Zustand
+│   └── useDeckStore.ts              # Zustand store
 ├── App.tsx
 ├── main.tsx
 └── index.css
 
-## ⚙️ Instalación y ejecución
+---
 
-1. **Clonar el repositorio**
-   ```bash
-   git clone https://github.com/tuusuario/pdf-vocabulary-assistant.git
-   cd pdf-vocabulary-assistant
+## Installation & run
 
+1. Clone the repository
+```powershell
+git clone https://github.com/tuusuario/pdf-vocabulary-assistant.git
+cd pdf-vocabulary-assistant
+```
 
-
-## Instalar dependencias
-
+2. Install dependencies
+```powershell
 npm install
+```
 
-
-Ejecutar en modo desarrollo
-
+3. Run in development mode
+```powershell
 npm run dev
+```
 
-
-Abrir en el navegador
-
+4. Open in the browser
 http://localhost:5173
 
-## 🧩 Cómo usar
+---
 
-Carga un archivo PDF (por ejemplo, un libro o artículo en inglés).
+## How to use
 
-Selecciona cualquier palabra o expresión.
+1. Load a PDF (book, paper in English, etc.).
+2. Select any word or phrase.
+3. In the popover:
+   - See the instant translation.
+   - Play pronunciation with the TTS button.
+   - Create a Q/A or Cloze flashcard.
+4. Go to Review mode to practice your cards.
+5. Export your cards to Anki when needed.
 
-En el popover:
+---
 
-Consulta su traducción inmediata.
+## Roadmap / Next improvements
 
-Escúchala con el botón de TTS.
+- Connect to real translation APIs (DeepL, Google Translate, etc.).
+- Automatic suggestions for useful expressions.
+- Persistent highlighting inside the PDF.
+- Responsive design and mobile support.
+- Optional cloud sync.
 
-Crea una tarjeta Q/A o Cloze.
+---
 
-Accede al modo Revisar para practicar tus tarjetas.
+## Contributing
 
-Exporta tus tarjetas a Anki cuando quieras.
+Contributions are welcome! To contribute:
 
-🔮 Próximas mejoras
+1. Fork the repository.
+2. Create a branch with your feature.
+3. Open a pull request.
 
-🌐 Traducción real conectada a API externa (DeepL, Google Translate, etc.)
+---
 
-🧠 Sugerencias automáticas de expresiones relevantes.
+## License
 
-📝 Resaltado persistente dentro del PDF.
+MIT — feel free to use, modify and redistribute with attribution.
 
-📱 Versión responsive para móviles y tablets.
+---
 
-☁️ Sincronización opcional con la nube.
+## Notes
 
-## 🤝 Contribuir
-
-¡Las contribuciones son bienvenidas!
-Si quieres colaborar:
-
-Haz un fork del repositorio.
-
-Crea una rama con tu nueva funcionalidad.
-
-Envía un pull request.
-
-## 📜 Licencia
-
-Este proyecto está bajo la licencia MIT.
-Puedes usarlo, modificarlo y distribuirlo libremente, siempre que se mantenga la atribución.
+This project starts from a Vite + React template. To inspect or modify the example app check:
+- `src/App.tsx`
+- `src/main.tsx`
+- `vite.config.ts`
+- `tsconfig.app.json`
+- `tsconfig.node.json`
+- `eslint.config.js`
 
 
-💬 “Learn as you read.”
