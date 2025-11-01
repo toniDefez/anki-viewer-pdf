@@ -1,0 +1,28 @@
+.Example {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+  font-family: system-ui, sans-serif;
+  background: #f9fafb;
+  min-height: 100vh;
+}
+
+.Example__container {
+  width: 90%;
+  max-width: 900px;
+  background: white;
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.Example__container__load {
+  margin-bottom: 1rem;
+}
+
+.Example__container__document {
+  position: relative;
+  overflow: auto;
+  max-height: 80vh;
+}
