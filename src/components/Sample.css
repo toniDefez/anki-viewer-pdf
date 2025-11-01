@@ -1,28 +1,291 @@
-.Example {
+/* Agregar/actualizar en tu styles.css */
+
+/* CRÍTICO: Mejorar selección de texto en móvil - VERSIÓN MEJORADA */
+.react-pdf__Page__textContent {
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+}
+
+.react-pdf__Page__textContent span {
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+  pointer-events: auto !important;
+  cursor: text !important;
+}
+
+/* Importante: Evitar que otros elementos interfieran con la selección */
+.react-pdf__Page__canvas {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+}
+
+.react-pdf__Page__annotations {
+  pointer-events: none !important;
+}
+
+/* Estilos para el menú flotante y overlay */
+.menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 10000;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.selection-panel {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to bottom, #ffffff 0%, #faf5ff 100%);
+  border-radius: 32px 32px 0 0;
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.3);
+  z-index: 10001;
+  max-height: 85vh;
+  overflow-y: auto;
+  animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.panel-handle {
+  padding: 16px 0 12px;
   display: flex;
-  flex-direction: column;
+  justify-content: center;
+  cursor: grab;
+  position: sticky;
+  top: 0;
+  background: linear-gradient(to bottom, #ffffff 70%, transparent);
+  z-index: 10;
+}
+
+.panel-handle-bar {
+  width: 48px;
+  height: 5px;
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.panel-content {
+  padding: 0 20px 28px;
+}
+
+.text-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #8b5cf6;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+  display: flex;
   align-items: center;
-  padding: 1rem;
-  font-family: system-ui, sans-serif;
-  background: #f9fafb;
-  min-height: 100vh;
+  gap: 6px;
 }
 
-.Example__container {
-  width: 90%;
-  max-width: 900px;
+.selected-text-display {
+  margin-bottom: 24px;
+}
+
+.text-content {
   background: white;
-  padding: 1rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+  border-radius: 16px;
+  border: 2px solid #e9d5ff;
+  font-size: 15px;
+  line-height: 1.7;
+  color: #1e293b;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.1);
 }
 
-.Example__container__load {
-  margin-bottom: 1rem;
+.translation-section {
+  margin-bottom: 24px;
 }
 
-.Example__container__document {
-  position: relative;
-  overflow: auto;
-  max-height: 80vh;
+.translation-content {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  padding: 16px;
+  border-radius: 16px;
+  border: 2px solid #86efac;
+  font-size: 15px;
+  line-height: 1.7;
+  color: #1e293b;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.1);
+}
+
+.translation-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 20px;
+  color: #8b5cf6;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid #e9d5ff;
+  border-top-color: #8b5cf6;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.translation-error {
+  padding: 16px;
+  color: #64748b;
+  font-size: 14px;
+  font-style: italic;
+  text-align: center;
+}
+
+.panel-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.action-btn {
+  border: none;
+  border-radius: 16px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 20px;
+  min-height: 56px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.action-btn:active {
+  transform: scale(0.96);
+}
+
+.action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+}
+
+.btn-primary:active:not(:disabled) {
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.btn-secondary {
+  background: white;
+  color: #64748b;
+  border: 2px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.btn-secondary:active:not(:disabled) {
+  background: #f8fafc;
+}
+
+.btn-cancel {
+  background: transparent;
+  color: #94a3b8;
+  margin-top: 8px;
+  font-weight: 600;
+}
+
+.btn-cancel:active {
+  background: #f8fafc;
+}
+
+.btn-large {
+  width: 100%;
+  font-size: 17px;
+  padding: 18px;
+  margin-bottom: 12px;
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+@media (max-width: 640px) {
+  .panel-content {
+    padding: 0 16px 24px;
+  }
+
+  .text-content,
+  .translation-content {
+    font-size: 14px;
+    padding: 14px;
+  }
+
+  .action-btn {
+    font-size: 14px;
+    padding: 14px 16px;
+    min-height: 52px;
+  }
+
+  .btn-large {
+    font-size: 16px;
+    padding: 16px;
+  }
+}
+
+/* Mejorar experiencia táctil en móvil */
+@media (pointer: coarse) {
+  .react-pdf__Page__textContent span {
+    padding: 3px 0;
+    line-height: 1.6;
+    /* Hacer el área táctil más grande */
+    min-height: 24px;
+    display: inline-block;
+  }
+  
+  /* Feedback visual al seleccionar */
+  .react-pdf__Page__textContent::selection {
+    background: #3b82f6;
+    color: white;
+  }
+  
+  .react-pdf__Page__textContent *::selection {
+    background: #3b82f6;
+    color: white;
+  }
+}
+
+/* Desactivar acciones de gestos que puedan interferir */
+.react-pdf__Page {
+  touch-action: pan-y pinch-zoom;
+  -webkit-touch-callout: default; /* Permitir menú contextual en iOS */
 }
