@@ -17,10 +17,22 @@ export default function PdfReader() {
   const [error, setError] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const onLoadSuccess = (pdf: PDFDocumentProxy) => {
+  const onLoadSuccess = async (pdf: PDFDocumentProxy) => {
     setNumPages(pdf.numPages);
     setLoading(false);
     setError(null);
+
+    // Extraer texto de la primera página como ejemplo
+    try {
+      const page = await pdf.getPage(1);
+      const textContent = await page.getTextContent();
+      const words = textContent.items
+        .map(item => 'str' in item ? item.str : '')
+        .filter(word => word.trim() !== '');
+      console.log('Palabras en la página:', words);
+    } catch (err) {
+      console.error('Error al extraer texto:', err);
+    }
   };
 
   const onLoadError = (err: Error) => {
@@ -50,22 +62,116 @@ export default function PdfReader() {
     };
   }, []);
 
+  // Estado para el contexto de la selección
+  const [selectionContext, setSelectionContext] = useState<{ context: string } | null>(null);
+
   // Detectar selección de texto continuamente
   useEffect(() => {
+    const getContext = (selection: Selection) => {
+      const range = selection.getRangeAt(0);
+      const selectedText = selection.toString().trim();
+      if (!selectedText) return null;
+
+      const anchorElement =
+        range.startContainer.nodeType === Node.TEXT_NODE
+          ? (range.startContainer.parentElement as HTMLElement | null)
+          : (range.startContainer as HTMLElement | null);
+      if (!anchorElement) return null;
+
+      const textLayer = anchorElement.closest(".react-pdf__Page__textContent");
+      if (!textLayer) {
+        return { context: selectedText };
+      }
+
+      const spans = Array.from(textLayer.querySelectorAll("span")).filter(
+        (span): span is HTMLSpanElement =>
+          !!span.textContent && span.textContent.trim().length > 0
+      );
+      if (!spans.length) {
+        return { context: selectedText };
+      }
+
+      const spansWithRect = spans.map(span => ({
+        span,
+        text: span.textContent ?? "",
+        rect: span.getBoundingClientRect(),
+      }));
+
+      const anchorSpan = anchorElement.closest("span");
+      const anchorIndex = spansWithRect.findIndex(item => item.span === anchorSpan);
+      if (anchorIndex === -1) {
+        return { context: selectedText };
+      }
+
+      const lineHeight = spansWithRect[anchorIndex].rect.height || 12;
+      const sameLineThreshold = lineHeight * 0.5;
+      const paragraphGapThreshold = lineHeight * 1.8;
+
+      const lines: { parts: string[]; top: number }[] = [];
+      const spanLineIndex: number[] = [];
+      let currentLine = -1;
+      let lastTop = Number.POSITIVE_INFINITY;
+
+      spansWithRect.forEach((item, idx) => {
+        if (!Number.isFinite(lastTop) || Math.abs(item.rect.top - lastTop) > sameLineThreshold) {
+          lines.push({ parts: [item.text], top: item.rect.top });
+          currentLine += 1;
+          lastTop = item.rect.top;
+        } else {
+          lines[currentLine].parts.push(item.text);
+        }
+        spanLineIndex[idx] = currentLine;
+      });
+
+      const anchorLine = spanLineIndex[anchorIndex];
+      let startLine = anchorLine;
+      for (let i = anchorLine - 1; i >= 0; i--) {
+        const gap = lines[i + 1].top - lines[i].top;
+        const hasText = lines[i].parts.join(" ").trim().length > 0;
+        if (!hasText || gap > paragraphGapThreshold) break;
+        startLine = i;
+      }
+
+      let endLine = anchorLine;
+      for (let i = anchorLine + 1; i < lines.length; i++) {
+        const gap = lines[i].top - lines[i - 1].top;
+        const hasText = lines[i].parts.join(" ").trim().length > 0;
+        if (!hasText || gap > paragraphGapThreshold) break;
+        endLine = i;
+      }
+
+      const paragraph = lines
+        .slice(startLine, endLine + 1)
+        .map(line => line.parts.join(" "))
+        .join(" ")
+        .replace(/\s+/g, " ")
+        .trim();
+
+      return { context: paragraph || selectedText };
+    };
+
     const handleSelectionChange = () => {
       const sel = window.getSelection();
-      const text = sel?.toString().trim();
       
-      if (text && text.length > 0) {
-        console.log('Texto seleccionado:', text);
-        setSelectedText(text);
-        
-        // Vibración táctil si está disponible (feedback móvil)
-        if (navigator.vibrate) {
-          navigator.vibrate(30);
+      if (sel && sel.rangeCount > 0) {
+        const selectedText = sel.toString().trim();
+        if (selectedText.length > 0) {
+          const contextResult = getContext(sel);
+          if (contextResult) {
+            console.log('Texto seleccionado:', selectedText);
+            console.log('Contexto:', contextResult.context);
+            setSelectedText(selectedText);
+            setSelectionContext(contextResult);
+            
+            // Vibración táctil si está disponible (feedback móvil)
+            if (navigator.vibrate) {
+              navigator.vibrate(30);
+            }
+          }
         }
       } else {
         setSelectedText("");
+        setSelectionContext(null);
         setShowMenu(false);
       }
     };
@@ -95,6 +201,7 @@ export default function PdfReader() {
   const handleCloseMenu = () => {
     setShowMenu(false);
     setSelectedText("");
+    setSelectionContext(null);
     window.getSelection()?.removeAllRanges();
   };
 
@@ -189,6 +296,7 @@ export default function PdfReader() {
       {showMenu && selectedText && (
         <SelectionMenu
           text={selectedText}
+          context={selectionContext?.context}
           onClose={handleCloseMenu}
         />
       )}

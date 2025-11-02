@@ -2,10 +2,11 @@ import { useState } from "react";
 
 interface SelectionMenuProps {
   text: string;
+  context?: string;
   onClose: () => void;
 }
 
-export default function SelectionMenu({ text, onClose }: SelectionMenuProps) {
+export default function SelectionMenu({ text, context, onClose }: SelectionMenuProps) {
   const [translation, setTranslation] = useState<string>("");
   const [loading, setLoading] = useState(false);
 
@@ -22,6 +23,13 @@ export default function SelectionMenu({ text, onClose }: SelectionMenuProps) {
     }
   };
 
+  const getContextAroundWord = (selected: string) => {
+    if (context && context.trim()) {
+      return context.replace(/\s+/g, " ").trim();
+    }
+    return selected;
+  };
+
   const translate = async () => {
     if (loading) return;
     
@@ -29,13 +37,18 @@ export default function SelectionMenu({ text, onClose }: SelectionMenuProps) {
     setTranslation("");
 
     try {
+      // Obtener el contexto de la palabra seleccionada
+      const contextText = getContextAroundWord(text);
+      
       const res = await fetch("https://libretranslate.de/translate", {
         method: "POST",
         body: JSON.stringify({
           q: text,
-          source: "en",
+         context: contextText, // Enviamos el contexto al servicio de traducción
+          source: "auto",
           target: "es",
           format: "text",
+          alternatives: 3,
         }),
         headers: { "Content-Type": "application/json" },
       });
@@ -43,7 +56,11 @@ export default function SelectionMenu({ text, onClose }: SelectionMenuProps) {
       if (!res.ok) throw new Error("Error en la respuesta");
 
       const data = await res.json();
+      
+      // Guardar tanto la traducción como el contexto usado
       setTranslation(data.translatedText || "No se pudo traducir");
+      console.log('Contexto usado para traducción:', contextText);
+      
     } catch (error) {
       console.error("Error al traducir:", error);
       setTranslation("Error al traducir 😞");
@@ -53,10 +70,12 @@ export default function SelectionMenu({ text, onClose }: SelectionMenuProps) {
   };
 
   const addCard = () => {
+    const context = getContextAroundWord(text);
     const card = {
       id: Date.now().toString(),
       front: text,
       back: translation || "(sin traducción)",
+      context: context, // Guardamos el contexto
       timestamp: new Date().toISOString(),
     };
     
@@ -68,9 +87,14 @@ export default function SelectionMenu({ text, onClose }: SelectionMenuProps) {
       cards.push(card);
       localStorage.setItem('ankiCards', JSON.stringify(cards));
       
-      // Feedback visual
+      // Feedback visual con contexto
       const preview = text.length > 50 ? text.substring(0, 50) + '...' : text;
-      alert(`✅ Tarjeta añadida!\n\n📝 Frente: ${preview}\n🌐 Reverso: ${translation || "(sin traducción)"}`);
+      alert(
+        `✅ Tarjeta añadida!\n\n` +
+        `📝 Palabra: ${preview}\n` +
+        `🌐 Traducción: ${translation || "(sin traducción)"}\n` +
+        `📚 Contexto: ${context}`
+      );
     } catch (error) {
       console.error("Error al guardar:", error);
       alert("Error al guardar la tarjeta");
